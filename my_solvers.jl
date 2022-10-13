@@ -90,15 +90,10 @@ function computeLk(A, k)
     return (Lk, Lk_inv)
 end
 
-function LUPsolve(A, b)
-
-    N = size(A)[1]
+function forwardSubtitution(L, b)
     
-    (L, U, P) = computeLUP(A)
+    N = size(L)[1]
 
-    b .= P * b
-
-    # forward substitution
     y = zeros(N)
 
     for i = 1:N
@@ -109,7 +104,13 @@ function LUPsolve(A, b)
         y[i] = f_sum / L[i, i]
     end
 
-    # backward substitution
+    return y
+end
+
+function backwardSubstitution(U, y)
+
+    N = size(U)[1]
+
     x = zeros(N)
 
     for i = N:-1:1
@@ -120,7 +121,22 @@ function LUPsolve(A, b)
         x[i] = b_sum / U[i,i]
     end
 
-    round.(x)
+    return x
+end
+
+function LUPsolve(A, b)
+
+    N = size(A)[1]
+    
+    (L, U, P) = computeLUP(A)
+
+    b .= P * b
+
+    # forward substitution
+    y = forwardSubtitution(L, b)
+
+    # backward substitution
+    x = backwardSubstitution(U, y)
 
     return x
 end
