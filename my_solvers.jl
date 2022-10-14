@@ -10,8 +10,8 @@ using Plots
 """
     computeLUP(A)
 
-Computes and returns lower "L" and upper "U" triangular matricies 
-and a permutation matrix "P" from a given square matrix "A"
+Computes and returns lower `L` and upper `U` triangular matricies 
+and a permutation matrix `P` from a given square matrix `A`
 via LUP factorization.
 
 (A) -> (L, U, P)
@@ -52,7 +52,7 @@ end
 """
     createIdentityMatrix(N)
 
-Creates and returns an NxN identity matrix "I" from a given "N"
+Creates and returns an NxN identity matrix `I` from a given `N`
 
 (N) -> I
 """
@@ -71,8 +71,8 @@ end
 """
     computePk(A, k)
 
-Computes and returns the jTh row of a given matrix "A" to be switched with
-the given "k"th row and the permutation matrix "p"
+Computes and returns the jTh row of a given matrix `A` to be switched with
+the given `k`th column and the permutation matrix `p`
 
 (A, k) -> (jRow, p)
 """
@@ -100,8 +100,8 @@ end
 """
     computeLk(A, k)
 
-Computes and returns the lower triangular matrix of the given matrix "A"
-at the given pivot row "k" "Lk" and its inverse "Lk_inv"
+Computes and returns the lower triangular matrix of the given matrix `A`
+at the given pivot at column `k` "Lk" and its inverse `Lk_inv`
 
 (A, k) -> (Lk, Lk_inv)
 """
@@ -123,8 +123,8 @@ end
 """
     forwardSubtitution(L, b)
 
-Performs forward substitution on a given matrix "L" and a solution
-vector "b" and returns the vector "y"
+Performs forward substitution on a given matrix `L` and a solution
+vector `b` and returns the vector `y`
 
 (L, b) -> y
 """
@@ -148,8 +148,8 @@ end
 """
     backwardSubtitution(U, y)
 
-Performs backward substitution on a given matrix "U" and a
-vector "y" and returns the vector "x"
+Performs backward substitution on a given matrix `U` and a
+vector `y` and returns the vector `x`
 
 (U, y) -> x
 """
@@ -173,8 +173,8 @@ end
 """
     LUPsolve(L, U, P, b)
 
-Solves Ax = b for x given lower and upper triangular matricies "L" & "U"
-with a permutation matrix "P" along with a solution vector "b"
+Solves Ax = b for x given lower and upper triangular matricies `L` & `U`
+with a permutation matrix `P` along with a solution vector `b`
 
 (L, U, P, b) -> x
 """
