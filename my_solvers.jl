@@ -7,6 +7,15 @@ LUP Solver
 
 using Plots
 
+"""
+    computeLUP(A)
+
+Computes and returns lower "L" and upper "U" triangular matricies 
+and a permutation matrix "P" from a given square matrix "A"
+via LUP factorization.
+
+(A) -> (L, U, P)
+"""
 function computeLUP(A)
 
     N = size(A)[1]
@@ -40,6 +49,13 @@ function computeLUP(A)
 
 end
 
+"""
+    createIdentityMatrix(N)
+
+Creates and returns an NxN identity matrix "I" from a given "N"
+
+(N) -> I
+"""
 function createIdentityMatrix(N)
 
     I = Matrix{Float64}(undef, N, N)
@@ -52,6 +68,14 @@ function createIdentityMatrix(N)
     return I
 end
 
+"""
+    computePk(A, k)
+
+Computes and returns the jTh row of a given matrix "A" to be switched with
+the given "k"th row and the permutation matrix "p"
+
+(A, k) -> (jRow, p)
+"""
 function computePk(A, k)
 
     N = size(A)[1]
@@ -73,8 +97,14 @@ function computePk(A, k)
 
 end
 
+"""
+    computeLk(A, k)
 
+Computes and returns the lower triangular matrix of the given matrix "A"
+at the given pivot row "k" "Lk" and its inverse "Lk_inv"
 
+(A, k) -> (Lk, Lk_inv)
+"""
 function computeLk(A, k)
 
     N = size(A)[1]
@@ -83,13 +113,21 @@ function computeLk(A, k)
     Lk_inv = createIdentityMatrix(N)
 
     for i = k+1:N
-        Lk[i,k] = -A[i,k] / A[k,k] # curr_elem / pivot_elem
+        Lk[i,k] = -A[i,k] / A[k,k] # - curr_elem / pivot_elem
         Lk_inv[i,k] = A[i,k] / A[k,k]
     end
 
     return (Lk, Lk_inv)
 end
 
+"""
+    forwardSubtitution(L, b)
+
+Performs forward substitution on a given matrix "L" and a solution
+vector "b" and returns the vector "y"
+
+(L, b) -> y
+"""
 function forwardSubtitution(L, b)
     
     N = size(L)[1]
@@ -107,6 +145,14 @@ function forwardSubtitution(L, b)
     return y
 end
 
+"""
+    backwardSubtitution(U, y)
+
+Performs backward substitution on a given matrix "U" and a
+vector "y" and returns the vector "x"
+
+(U, y) -> x
+"""
 function backwardSubstitution(U, y)
 
     N = size(U)[1]
@@ -124,11 +170,17 @@ function backwardSubstitution(U, y)
     return x
 end
 
-function LUPsolve(A, b)
+"""
+    LUPsolve(L, U, P, b)
+
+Solves Ax = b for x given lower and upper triangular matricies "L" & "U"
+with a permutation matrix "P" along with a solution vector "b"
+
+(L, U, P, b) -> x
+"""
+function LUPsolve(L, U, P, b)
 
     N = size(A)[1]
-    
-    (L, U, P) = computeLUP(A)
 
     b .= P * b
 
@@ -141,11 +193,57 @@ function LUPsolve(A, b)
     return x
 end
 
+# ~~~ Tests and Timing at N = 10, 100, 1000 ~~~ #
 
-tempA = Matrix{Float64}(undef, 3, 3)
-tempA .= [6 -2 2;12 -8 6;3 -13 3]
-b = [6,3,5]
+# N = 1000
+B_1000 = rand(1000, 1000)
+b_1000 = rand(1000, 1)
+I_1000 = createIdentityMatrix(1000)
+A_1000 = transpose(B_1000) * B_1000 + I_1000
 
-(L, U, P) = computeLUP(tempA)
+println("N = 1000")
+@time (L_1000, U_1000, P_1000) = computeLUP(A_1000)
+@time x_1000 = LUPsolve(L_1000, U_1000, P_1000, b_1000)
 
-x = LUPsolve(tempA, b)
+@assert L_1000 * U_1000 * x_1000 ≈ P_1000 * b_1000
+@assert A_1000 * x_1000 ≈ b_1000
+
+# N = 100
+B_100 = rand(100, 100)
+b_100 = rand(100, 1)
+I_100 = createIdentityMatrix(100)
+A_100 = transpose(B_100) * B_100 + I_100
+
+println("N = 100")
+@time (L_100, U_100, P_100) = computeLUP(A_100)
+@time x_100 = LUPsolve(L_100, U_100, P_100, b_100)
+
+@assert L_100 * U_100 * x_100 ≈ P_100 * b_100
+@assert A_100 * x_100 ≈ b_100
+
+# N = 10
+B_10 = rand(10, 10)
+b_10 = rand(10, 1)
+I_10 = createIdentityMatrix(10)
+A_10 = transpose(B_10) * B_10 + I_10
+
+println("N = 10")
+@time (L_10, U_10, P_10) = computeLUP(A_10)
+@time x_10 = LUPsolve(L_10, U_10, P_10, b_10)
+
+@assert L_10 * U_10 * x_10 ≈ P_10 * b_10
+@assert A_10 * x_10 ≈ b_10
+
+"""
+x_axis = [10, 100, 1000]
+compute_times = [0.000045, 0.086714, 94.566791]
+solve_times = [0.000016, 0.000043, 0.082035]
+
+plot(x_axis, compute_times,xlabel = "N elements", 
+ylabel = "execution time in seconds", title = "computeLUP Times", 
+color = :magenta, linewidth = 6) 
+
+plot(x_axis, solve_times,xlabel = "N elements", 
+ylabel = "execution time in seconds", title = "LUPsolve Times", 
+color = :blue, linewidth = 6)
+"""
