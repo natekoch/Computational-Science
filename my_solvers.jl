@@ -1,8 +1,8 @@
 """
 Nate Koch
 CS 410: Computational Science
-Homework 1
-LUP Solver
+Homework 1 & 2
+LUP Solver & Conjugate Gradient Method
 """
 
 using Plots
@@ -180,7 +180,7 @@ with a permutation matrix `P` along with a solution vector `b`
 """
 function LUPsolve(L, U, P, b)
 
-    N = size(A)[1]
+    N = size(L)[1]
 
     b .= P * b
 
@@ -189,6 +189,48 @@ function LUPsolve(L, U, P, b)
 
     # backward substitution
     x = backwardSubstitution(U, y)
+
+    return x
+end
+
+"""
+    conj_grad(A, b)
+
+Computes the conjugate gradient of a given NxN matrix `A`
+with a given N-element solution vector `b` that returns 
+the computed vector `x` to solve the linear system Ax=b
+for x. This is an iterative method. 
+
+(A, b) -> x
+"""
+function conj_grad(A, b)
+   
+    N = size(b)
+    max_iterations = 100 
+    ϵ = 1.0e-6 # machine precision
+    x = zeros(N) # guess for x just all zeros
+    r = A * x - b # compute the residual from the initial guess
+
+    p = r
+    ρ_old = 1
+    for i = 1:max_iterations
+        ρ = (transpose(r) * r)[1]
+        if i == 1
+            p = r
+        else
+            β = ρ/ρ_old
+            p = r + β * p
+        end
+        q = A * p
+        δ = (ρ / ((transpose(p) * q))[1])[1]
+        x = x - δ * p 
+        r = r - δ * q
+        ρ_old = ρ # store the ρ from this iteration
+
+        if sqrt((transpose(r) * r)[1]) ≤ ϵ
+            break
+        end
+    end
 
     return x
 end
@@ -202,11 +244,15 @@ I_1000 = createIdentityMatrix(1000)
 A_1000 = transpose(B_1000) * B_1000 + I_1000
 
 println("N = 1000")
-@time (L_1000, U_1000, P_1000) = computeLUP(A_1000)
-@time x_1000 = LUPsolve(L_1000, U_1000, P_1000, b_1000)
+#@time (L_1000, U_1000, P_1000) = computeLUP(A_1000)
+#@time x_1000 = LUPsolve(L_1000, U_1000, P_1000, b_1000)
 
-@assert L_1000 * U_1000 * x_1000 ≈ P_1000 * b_1000
-@assert A_1000 * x_1000 ≈ b_1000
+#@assert L_1000 * U_1000 * x_1000 ≈ P_1000 * b_1000
+#@assert A_1000 * x_1000 ≈ b_1000
+
+@time xx_1000 = conj_grad(A_1000, b_1000)
+
+@assert isapprox((A_1000 * xx_1000), b_1000, atol = 1e-2) # need higher tolerance 1e-2
 
 # N = 100
 B_100 = rand(100, 100)
@@ -215,11 +261,15 @@ I_100 = createIdentityMatrix(100)
 A_100 = transpose(B_100) * B_100 + I_100
 
 println("N = 100")
-@time (L_100, U_100, P_100) = computeLUP(A_100)
-@time x_100 = LUPsolve(L_100, U_100, P_100, b_100)
+#@time (L_100, U_100, P_100) = computeLUP(A_100)
+#@time x_100 = LUPsolve(L_100, U_100, P_100, b_100)
 
-@assert L_100 * U_100 * x_100 ≈ P_100 * b_100
-@assert A_100 * x_100 ≈ b_100
+#@assert L_100 * U_100 * x_100 ≈ P_100 * b_100
+#@assert A_100 * x_100 ≈ b_100
+
+@time xx_100 = conj_grad(A_100, b_100)
+
+@assert isapprox((A_100 * xx_100), b_100, atol = 1e-3) # need higher tolerance 1e-3
 
 # N = 10
 B_10 = rand(10, 10)
@@ -228,11 +278,23 @@ I_10 = createIdentityMatrix(10)
 A_10 = transpose(B_10) * B_10 + I_10
 
 println("N = 10")
-@time (L_10, U_10, P_10) = computeLUP(A_10)
-@time x_10 = LUPsolve(L_10, U_10, P_10, b_10)
+#@time (L_10, U_10, P_10) = computeLUP(A_10)
+#@time x_10 = LUPsolve(L_10, U_10, P_10, b_10)
 
-@assert L_10 * U_10 * x_10 ≈ P_10 * b_10
-@assert A_10 * x_10 ≈ b_10
+#@assert L_10 * U_10 * x_10 ≈ P_10 * b_10
+#@assert A_10 * x_10 ≈ b_10
+
+@time xx_10 = conj_grad(A_10, b_10)
+
+@assert isapprox((A_10 * xx_10), b_10, atol = 1e-3) # need higher tolerance 1e-3
+
+x_axis = [10, 100, 1000]
+compute_times = [0.000040, 0.000412, 0.217529]
+solve_times = [0.000016, 0.000043, 0.082035]
+
+plot(x_axis, compute_times, xlabel = "N elements", 
+ylabel = "execution time in seconds", title = "conj_grad Times", 
+color = :red, linewidth = 6) 
 
 """
 x_axis = [10, 100, 1000]
