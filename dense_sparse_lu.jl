@@ -1,6 +1,16 @@
 using LinearAlgebra
 using SparseArrays
 
+"""
+    dense_solve
+
+For use only in this file.
+Take no arguments. Returns a computed x vector for a dense matrix.
+LU factorization then solve for x in Ax=b.
+Times each computation.
+
+() -> x
+"""
 function dense_solve()
     A = zeros(N, N)
 
@@ -23,7 +33,16 @@ function dense_solve()
     return x
 end
 
+"""
+    sparse_solve
 
+For use only in this file. 
+Take no arguments. Returns a computed x vector for a sparse matrix.
+LU factorization then solve for x in Ax=b.
+Times each computation.
+
+() -> x
+"""
 function sparse_solve()
     A = spzeros(N, N)
 
@@ -45,9 +64,6 @@ function sparse_solve()
 
     return x
 end
-
-println("IGNORE COMPILE TIME:")
-@time 1 # to remove compilation time from results below
 
 N = 100
 println("\nN = 100")
@@ -84,3 +100,20 @@ sparse_solve()
 sparse_x = sparse_solve()
 
 @assert dense_x ≈ sparse_x
+
+#=
+x_values = [100, 1000, 10000]
+
+dense_lu = [0.000225, 0.036726, 7.089112]
+sparse_lu = [0.000259, 0.001106, 0.011614]
+
+dense_x_solve = [0.000010, 0.002436, 0.047155]
+sparse_x_solve = [0.000042, 0.000080, 0.000561]
+
+
+plot(x_values, dense_lu, label = "Dense LU", ylabel = "Computation Time (s)", xlabel = "N in NxN Matrix", title = "LU Factorization Time")
+plot!(x_values, sparse_lu, label = "Sparse LU")
+
+plot(x_values, dense_x_solve, label = "Dense x = F|b", ylabel = "Computation Time (s)", xlabel = "N in NxN Matrix", title = "x = F|b Solve Time")
+plot!(x_values, sparse_x_solve, label = "Sparse x = F|b")
+=#
